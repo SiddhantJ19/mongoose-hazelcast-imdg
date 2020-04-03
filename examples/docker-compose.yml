@@ -1,0 +1,45 @@
+version: "3.3"
+
+networks: 
+  hazelcast-net:
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
+
+services:
+
+  hazelcast-node1:
+    image: hazelcast/hazelcast:3.12.6
+    networks:
+      hazelcast-net:
+        ipv4_address: 172.21.0.5
+    ports:
+      - "5701:5701"
+    depends_on:
+      - management-center
+    restart: on-failure
+    environment: 
+      - MANCENTER_URL=http://management-center:8000/hazelcast-mancenter
+
+  hazelcast-node2:
+    image: hazelcast/hazelcast:3.12.6
+    networks:
+      hazelcast-net:
+        ipv4_address: 172.21.0.6
+    ports:
+      - "5702:5701"
+    depends_on:
+      - management-center
+    restart: on-failure
+    environment: 
+      - MANCENTER_URL=http://management-center:8000/hazelcast-mancenter
+
+  management-center:
+    image: hazelcast/management-center:3.12.8
+    networks:
+      hazelcast-net:
+        ipv4_address: 172.21.0.2
+    ports:
+      - "8000:8000"
+    environment:
+      - MC_HTTP_PORT=8000

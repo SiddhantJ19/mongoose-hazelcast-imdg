@@ -1,0 +1,16 @@
+{
+  "name": "mongoose-hazelcast-imdg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "hazelcast-client": "^3.12.2",
+    "mongoose": "^5.9.6"
+  }
+}
