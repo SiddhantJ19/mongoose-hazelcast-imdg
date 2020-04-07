@@ -13,15 +13,15 @@ db.once('open', async function () {
     // required
     const client = await hazelcast.Client.newHazelcastClient(config)
     const cache = await mongooseCache(client, 'namespace')
-
+    console.log('cache', cache)
     var kittySchema = new mongoose.Schema({
         name: String
     });
 
     var Kitten = mongoose.model('Kitten', kittySchema);
-    var fluffy = await new Kitten({ name: 'fluffy5' }); 
+    var fluffy = await new Kitten({ name: 'fluffy02' }); 
     await fluffy.save().then((res) => res)
 
-    const val = Kitten.findOne({name: 'fluffy5'}).cache('key2').then(res => console.log(res))
-    // console.log(val)
+    const val = Kitten.findOne({name: 'fluffy02'}).cache('key11').then(res => console.log('res', res))
+    console.log(val)
 });

@@ -1,13 +1,14 @@
 const mongoose = require('mongoose')
-module.exports = async function (client, namespace) {
+module.exports = async function (client, namespace, variableStore) {
     let exec = mongoose.Query.prototype.exec
     mongoose.Query.prototype.cache = function (custom_key){
         if(!custom_key){
             return new Error('KEY param required in cache')
         }
-        this._key = custom_key
+        this._key = namespace.toString() + custom_key.toString()
+        console.log('key', this._key)
         this._cache = true
-        this.IMap = client.getMap(namespace).then(mp => mp)
+        this.IMap = variableStore === true ? client : client.getMap(namespace).then(mp => mp)
         return this
     }
 
@@ -16,7 +17,6 @@ module.exports = async function (client, namespace) {
             return exec.apply(this, arguments)
         }else{
             this.IMap = await this.IMap
-            console.log(this.IMap)
             // cache present
             const value = await this.IMap.get(this._key)
             console.log('value', value)
@@ -26,9 +26,16 @@ module.exports = async function (client, namespace) {
                 return new this.model((doc))
             }else{
                 const result = await exec.apply(this, arguments)
+                console.log('Put result', result)
                 await this.IMap.put(this._key, JSON.stringify(result))
                 return result
             }
         }
     }
 }
+
+/**
+ * TODO
+ * 1. line 25 --> check if data is array
+ * 
+ */
