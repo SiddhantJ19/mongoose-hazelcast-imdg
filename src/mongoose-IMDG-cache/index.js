@@ -6,7 +6,6 @@ module.exports = async function (client, namespace, variableStore) {
             return new Error('KEY param required in cache')
         }
         this._key = namespace.toString() + custom_key.toString()
-        console.log('key', this._key)
         this._cache = true
         this.IMap = variableStore === true ? client : client.getMap(namespace).then(mp => mp)
         return this
@@ -19,14 +18,12 @@ module.exports = async function (client, namespace, variableStore) {
             this.IMap = await this.IMap
             // cache present
             const value = await this.IMap.get(this._key)
-            console.log('value', value)
             if(value){ // cache hit
                 console.log('cache-hit')
                 const doc = JSON.parse(value)
                 return new this.model((doc))
             }else{
                 const result = await exec.apply(this, arguments)
-                console.log('Put result', result)
                 await this.IMap.put(this._key, JSON.stringify(result))
                 return result
             }

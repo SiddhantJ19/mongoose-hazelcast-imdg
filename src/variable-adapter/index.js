@@ -1,20 +1,20 @@
 class VariableAdapter {
     constructor(){
-        this.store = new Map()
+        this.store = {}
     }
 
     put(key, value){
-        this.store.set(key, value)
+        this.store[key] = value
         return Promise.resolve()
     }
 
     get(key){
-        const data = this.store.get(key)
-        return Promise.resolve(data ? JSON.parse(data) : data)
+        const data = this.store[key]
+        return Promise.resolve(data)
     }
 
     del(key){
-        delete this.store.delete(key)
+        delete this.store[key]
         return Promise.resolve()
     }
 }
