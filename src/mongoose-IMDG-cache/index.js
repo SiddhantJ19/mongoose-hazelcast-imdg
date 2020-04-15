@@ -24,7 +24,9 @@ module.exports = async function (client, namespace, variableStore) {
                 return new this.model((doc))
             }else{
                 const result = await exec.apply(this, arguments)
-                await this.IMap.put(this._key, JSON.stringify(result))
+                if (result){
+                    await this.IMap.put(this._key, JSON.stringify(result))
+                }
                 return result
             }
         }

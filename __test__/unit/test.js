@@ -34,7 +34,7 @@ describe('cache props', () => {
   
   afterAll(async () => {
     await Kitten.deleteMany() // Change it to DROP Collections
-    connection.close() 
+    await connection.close() 
   });
 
   it('should be empty on start', () => {
@@ -49,30 +49,49 @@ describe('cache props', () => {
 
   it('any query with cache method should return a Query object', () => {
     var fluffy = models.kitten.findOne({name: 'fluffy'}).cache('key1')
+    // console.log(fluffy)
     expect(fluffy instanceof mongoose.Query ).toBeTruthy()
+    const store = client.store
+    expect(store).toEqual({}) // data not yet cached
   });
 
   it('CREATE: should store data to cache if key is entered for the first time', async () => {
-    var fluffy = await models.kitten.findOne({ name: 'fluffy' }).cache('key1')
+    // TODO: should also work with create query
+    var fluffy = await models.kitten.findOne({ name: 'fluffy' }).cache('key2')
     const store = client.store
-    expect(store).toHaveProperty('_dummy_key1')
+    expect(store).toHaveProperty('_dummy_key2')
   });
 
   it('READ: if key is present, value should be fetched from the cache and not DB', async () => {
     const jumbo = new models.kitten({name: 'jumbo'})
     await jumbo.save()
-    let jumbo_get_1 = await models.kitten.findOne({name: 'jumbo'}).cache('key2')
-    await models.kitten.deleteMany({ name: 'jumbo'})
-    let jumbo_get_2 = await models.kitten.findOne({name: 'jumbo'}).cache('key2')
+    let jumbo_get_1 = await models.kitten.findOne({name: 'jumbo'}).cache('key3')
+    await models.kitten.deleteMany({ name: 'jumbo'}) // deleting from db
+    let jumbo_get_2 = await models.kitten.findOne({name: 'jumbo'}).cache('key3')
     expect(jumbo_get_2._id).toEqual(jumbo_get_1._id)
   });
 
-  
+
+  it('Update: the update query should update the value in both db and cache', async () => {
+    const pondy = new models.kitten({name: 'pondy'})
+    await pondy.save()
+    let pondy_get_1 = await models.kitten.findOne({name: 'pondy'}).cache('pondy')
+    const store = client.store
+    expect(store).toHaveProperty('_dummy_pondy')
+    const updated =  await models.kitten.findOneAndUpdate({name: 'pondy'}, {name: 'new_pondy'}).cache('pondy')
+    const new_pondy = await models.kitten.findOne({ name: 'new_pondy' }).cache('new_pondy')
+    console.log(updated)
+  });
+
 
   /**
    * 1. Currently updating value for a key is not supported
    * 2. Even If data does not exist in the db but respective key exists, it will be loaded --> cache invalidation 
-   * 3. So it is required to assign a unique key for every unique query
+   * 3. Similar case if other helper functions are chained. No effect will be seen cache values --> cache invalidation
+   * 4. Need a way to use query as a key part
+   *    query -> to decide get, update
+   *    key -> put
+   * 5. So it is required to assign a unique key for every unique query
    * 
    * */ 
 });
