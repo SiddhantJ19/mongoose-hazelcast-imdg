@@ -1,13 +1,21 @@
 const mongoose = require('mongoose')
-module.exports = async function (client, namespace, variableStore) {
+const VariableStore = require('../variable-adapter')
+const generateKey = require('./generateKey')
+
+function _isHazelcast(client) {
+    if (client['listenerService']){
+        return true;
+    }
+    return false;
+}
+
+module.exports = async function (client, namespace) {
     let exec = mongoose.Query.prototype.exec
     mongoose.Query.prototype.cache = function (custom_key){
-        if(!custom_key){
-            return new Error('KEY param required in cache')
-        }
-        this._key = namespace.toString() + custom_key.toString()
+        this._customKey = custom_key ? custom_key.toString() : null
         this._cache = true
-        this.IMap = variableStore === true ? client : client.getMap(namespace).then(mp => mp)
+        this.IMap = _isHazelcast(client) === false ? new VariableStore() : client.getMap(namespace).then(mp => mp)
+        // console.log(this.IMap)
         return this
     }
 
@@ -16,11 +24,15 @@ module.exports = async function (client, namespace, variableStore) {
             return exec.apply(this, arguments)
         }else{
             this.IMap = await this.IMap
-            // cache present
+            
+            this._key = generateKey(this._customKey, namespace, await this.getQuery());
+            // console.log(this._key)
             const value = await this.IMap.get(this._key)
+            
             if(value){ // cache hit
                 console.log('cache-hit')
                 const doc = JSON.parse(value)
+                console.log(doc)
                 return new this.model((doc))
             }else{
                 const result = await exec.apply(this, arguments)
@@ -36,5 +48,5 @@ module.exports = async function (client, namespace, variableStore) {
 /**
  * TODO
  * 1. line 25 --> check if data is array
- * 
+ * 2. Key construction using query properties
  */

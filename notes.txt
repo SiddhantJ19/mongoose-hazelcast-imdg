@@ -1,0 +1,22 @@
+Q: What to cache
+1. The CRUD operations should only be cached
+    Create: -> save(), create()
+    read: -> find(), findOne(), findById()
+    update: -> updateOne, updateMany, findByIdAndUpdate, findByIdAndReplace
+    delete: -> similar
+
+Q: Check if Query object contains info about mongo middleware
+
+Q: Also current chaining cache queries doesn't work with callback
+
+APIs:
+
+model.prototype.save()
+
+middleware implementation
+pros -> can cache the output of complete query, 
+cons -> The data may become useless for any other query, Cannot perform update or delete, since the query cannot be identified
+
+Wrapper implementation
+pros -> only cache reusable data i.e as stored in db
+cons -> Make it chainable, by conveting data to query object
