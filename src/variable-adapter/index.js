@@ -3,17 +3,17 @@ class VariableAdapter {
         this.store = {}
     }
 
-    put(key, value){
+    async put(key, value){
         this.store[key] = value
         return Promise.resolve()
     }
 
-    get(key){
+    async get(key){
         const data = this.store[key]
         return Promise.resolve(data)
     }
 
-    del(key){
+    async del(key){
         delete this.store[key]
         return Promise.resolve()
     }

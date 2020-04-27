@@ -9,13 +9,20 @@ function _isHazelcast(client) {
     return false;
 }
 
+function newVariableStore(client) {
+    if (client instanceof VariableStore){
+        return client
+    }
+    return new VariableStore()
+}
+
 module.exports = async function (client, namespace) {
     let exec = mongoose.Query.prototype.exec
+    
     mongoose.Query.prototype.cache = function (custom_key){
         this._customKey = custom_key ? custom_key.toString() : null
         this._cache = true
-        this.IMap = _isHazelcast(client) === false ? new VariableStore() : client.getMap(namespace).then(mp => mp)
-        // console.log(this.IMap)
+        this.IMap = _isHazelcast(client) === false ? newVariableStore(client) : client.getMap(namespace).then(mp => mp)
         return this
     }
 
@@ -26,15 +33,14 @@ module.exports = async function (client, namespace) {
             this.IMap = await this.IMap
             
             this._key = generateKey(this._customKey, namespace, await this.getQuery());
-            // console.log(this._key)
             const value = await this.IMap.get(this._key)
             
             if(value){ // cache hit
                 console.log('cache-hit')
                 const doc = JSON.parse(value)
-                console.log(doc)
                 return new this.model((doc))
             }else{
+                console.log("cache-miss")
                 const result = await exec.apply(this, arguments)
                 if (result){
                     await this.IMap.put(this._key, JSON.stringify(result))

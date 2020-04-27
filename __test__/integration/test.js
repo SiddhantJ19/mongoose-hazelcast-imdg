@@ -29,7 +29,7 @@ describe('cache props', () => {
     models.kitten = kitten
     // Cache
     client = new VariableAdapter()
-    cache = await mongooseCache(client, '_dummy_', true)
+    cache = await mongooseCache(client, '_dummy_')
   })
   
   afterAll(async () => {
@@ -56,9 +56,11 @@ describe('cache props', () => {
 
   it('CREATE: should store data to cache if key is entered for the first time', async () => {
     // TODO: should also work with create query
-    var fluffy = await models.kitten.findOne({ name: 'fluffy' }).cache('key2')
+    const kiddo = new models.kitten({name: 'kiddo'})
+    await kiddo.save()
+    var kiddo1 = await models.kitten.findOne({ name: 'kiddo' }).cache('kiddo')
     const store = client.store
-    expect(store).toHaveProperty('_dummy_key2')
+    expect(store).toHaveProperty('_dummy_kiddo')
   });
 
   it('READ: if key is present, value should be fetched from the cache and not DB', async () => {
