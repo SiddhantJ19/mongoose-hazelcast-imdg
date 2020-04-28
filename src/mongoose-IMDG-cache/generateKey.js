@@ -1,9 +1,9 @@
-module.exports = function generateKey(customKey, namespace, Query) {
-    if (customKey) {
-        return namespace.toString() + customKey;
+module.exports = function generateKey(query) {
+    if (query._customKey) {
+        return query._namespace.toString() + query._customKey;
     }
     return JSON.stringify({
-        namespace: namespace,
-        ...Query
+        namespace: query._namespace,
+        ...query.getQuery()
     })
 }

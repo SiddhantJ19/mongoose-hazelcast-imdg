@@ -19,9 +19,7 @@ db.once('open', async function () {
 
     var Kitten = mongoose.model('Kitten', kittySchema);
     var fluffy = await new Kitten({ name: 'fluffy02' }); 
-    await fluffy.save().then((res) => res)
+    await fluffy.save()
 
-    Kitten.findOne({name: 'fluffy02'}).cache("EKK").then(res => console.log('res', res))
-    Kitten.findOne({ name: 'fluffy02' }).cache().then(res => console.log('res', res))
-
+    Kitten.findOne({name: 'fluffy02'}).cache("EK").then(res => console.log('res', res))
 });
