@@ -21,5 +21,7 @@ db.once('open', async function () {
     var fluffy = await new Kitten({ name: 'fluffy02' }); 
     await fluffy.save().then((res) => res)
 
-    const val = Kitten.findOne({name: 'fluffy02'}).cache().then(res => console.log('res', res))
+    Kitten.findOne({name: 'fluffy02'}).cache("EKK").then(res => console.log('res', res))
+    Kitten.findOne({ name: 'fluffy02' }).cache().then(res => console.log('res', res))
+
 });
